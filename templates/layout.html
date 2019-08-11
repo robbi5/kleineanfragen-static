@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}{% endblock title %}{% if self.title() %} - {% endif %}kleineAnfragen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" media="all" href="{{ url_for('static', filename='application.css') }}" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <meta property="og:site_name" content="kleineAnfragen" />
+  <meta name="twitter:card" value="summary" />
+  <meta name="twitter:site" value="@kleineanfragen" />
+  {% block head %}{% endblock %}
+  <!-- Entwickler*in? Auf der Suche nach Rohdaten oder einer API? Schau bei /data vorbei. -->
+</head>
+<body class="site-closing">
+<header class="alert alert-danger alert-obituary">
+  <div class="container">
+    <p>kleineAnfragen wird zum <strong>31.12.2020 abgeschaltet</strong>. <a href="{{ url_for('info_stilllegung') }}">Mehr Informationen und Hintergründe</a></p>
+  </div>
+</header>
+
+<header class="navbar navbar-static-top" id="top" role="banner">
+  <div class="container">
+    <div class="navbar-header">
+      <a href="{{ url_for('index') }}" class="navbar-brand" data-no-turbolink='true'>kleineAnfragen.</a>
+    </div>
+
+    <nav role="navigation">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="https://twitter.com/kleineanfragen"><span class="hidden-xs hidden-sm">@kleineanfragen auf </span>Twitter</a></li>
+        <li class="hidden-xs"><a href="{{ url_for('info_spenden') }}" class="donate">Unterstützen</a></li>
+      </ul>
+    </nav>
+
+    {% if display_header_search %}
+    <form class="navbar-form navbar-left search search--navbar" role="search" action="/search" method="get" class="search">
+      <div class="input-group">
+        <label for="searchq" class="sr-only">Suche in Anfragen:</label>
+        <input type="search" id="searchq" name="q" class="form-control" placeholder="Suche nach Themen&hellip;"/>
+        <span class="input-group-btn">
+          <button class="btn btn-success" type="submit">Suchen</button>
+        </span>
+      </div>
+    </form>
+    {% endif %}
+  </div>
+</header>
+
+<main class="{% block main_class %}{% endblock main_class %}">
+  {% block main_fullwidth_prepend %}{% endblock main_fullwidth_prepend %}
+  <div class="container">
+    {% block content %}{% endblock content %}
+  </div>
+  {% block main_fullwidth_append %}{% endblock main_fullwidth_append %}
+</main>
+
+<footer class="app-footer container">
+  <div class="row">
+    <div class="col-md-10 footer-project-line">
+      <p>
+        kleineAnfragen war ein ehrenamtliches Projekt der <a href="https://okfn.de">Open Knowledge Foundation Deutschland e.V.</a>.
+        <a href="{{ url_for('info_stilllegung') }}">Weitere Informationen und Hintergründe zur Abschaltung</a>.
+      </p>
+    </div>
+    <div class="col-md-2 col-xs-6 footer-support-logo">
+      <a href="https://okfn.de"><img src="{{ url_for('static', filename='okfn-logo.svg') }}" alt="Open Knowledge Foundation Deutschland e.V." role="presentation" /></a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <nav class="footer-links">
+        <ul>
+          <li><a href="{{ url_for('info') }}">Über diese Seite</a></li>
+          <li><a href="{{ url_for('info_daten') }}">Daten(qualität) & API</a></li>
+          <li><a href="{{ url_for('info_mitmachen') }}">Mitmachen</a></li>
+          <li><a href="{{ url_for('info_datenschutz') }}">Datenschutz</a></li>
+          <li><a href="{{ url_for('info_kontakt') }}">Kontakt & Impressum</a></li>
+          <li class="visible-xs-block"><a href="https://twitter.com/kleineanfragen">@kleineanfragen auf Twitter</a></li>
+          <li class="visible-xs-block"><a href="{{ url_for('info_spenden') }}" class="donate">Unterstützen</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="col-sm-6">
+      <nav class="footer-links footer-related">
+        <ul>
+          <li><a href="https://sehrgutachten.de" title="sehrgutachten - Dokumente der wissenschaftlichen Dienste">sehrgutachten.de</a></li>
+          <li><a href="https://offenesparlament.de" title="OffenesParlament - Daten aus unseren Parlamenten">OffenesParlament.de</a></li>
+          <li><a href="https://politik-bei-uns.de" title="Politik bei Uns - Transparente Kommunalpolitik für ganz Deutschland">Politik-Bei-Uns.de</a></li>
+          <li><a href="https://fragdenstaat.de" title="Frag den Staat - Portal für Informationsfreiheit">FragDenStaat.de</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script type="text/javascript" src="{{ url_for('static', filename='enhance.js') }}"></script>
+</body>
+</html>

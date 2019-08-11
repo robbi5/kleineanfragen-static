@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block head %}
+  <meta name="description" content="kleineAnfragen sammelt kleine und große Anfragen von den Landesparlamenten und macht diese durchsuch- und verlinkbar" />
+  <!-- FIXME -->
+  <% auto_discovery_link_tag(:atom, recent_url(format: :atom)) %>
+{% endblock %}
+{% block main_fullwidth_prepend %}
+<div class="jumbotron jumbotron--home">
+  <div class="container">
+    <form action="/search" method="get" role="search" class="search">
+      <!-- FIXME -->
+      <p><label for="searchq" class="tagline">Suche in über <%= number_with_delimiter @count %> Anfragen:</label></p>
+      <div class="input-group">
+        <input type="text" id="searchq" name="q" class="form-control" placeholder="Suche nach Themen wie &quot;Schulen&quot;, &quot;Mobilität&quot;, &hellip;" />
+        <span class="input-group-btn">
+          <button class="btn btn-success" type="submit">Suchen</button>
+        </span>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-sm-6">
+    <h2>Was sind <em>kleine Anfragen</em>?</h2>
+    <p>Mit <em>kleinen Anfragen</em> können Abgeordnete in Parlamenten ihrer jeweiligen Regierung Fragen stellen, die von dieser zeitnah beantwortet und veröffentlicht werden müssen.</p>
+    <p>Diese Seite sammelt kleine Anfragen* der Landesparlamente und des Bundestages und versucht sie möglichst einfach auffind-, durchsuch- und verlinkbar zu machen.</p>
+    <p>Mehr zu den Anfragearten und den Regelungen in den einzelnen Landtagen auf der <a href="https://de.wikipedia.org/wiki/Kleine_Anfrage_(Deutschland)">Wikipedia-Seite zu kleinen Anfragen</a>.</p>
+    <p><small>*: Natürlich auch schriftliche und große Anfragen</small></p>
+
+    <h3>Warum?</h3>
+    <p>In Antworten auf kleine Anfragen verstecken sich immer wieder interessante Details.</p>
+    <p>So konnte Zeit Online z.B. durch einer Reihe kleiner Anfragen, die die Grünen-Bundestagsfraktion an die Bundesregierung gerichtet hatte, eine <a href="http://www.zeit.de/mobilitaet/2014-09/deutsche-bahn-bruecken-zustand">interaktive Karte über den Zustand von Bahnbrücken</a> erstellen.</p>
+
+    <h2>Länder- und Parlamentsübersicht:</h2>
+    <div class="row bodies">
+      <div class="col-sm-5 col-sm-push-6">
+        <ul class="bodies-list">
+          <!-- FIXME -->
+          <% @bodies.each do |body| %>
+          <li><a href="<%= body_path body %>" class="link-state-<%= body.state %>" data-state="<%= body.state %>"><%= body.name %></a></li>
+          <% end %>
+        </ul>
+      </div>
+      <div class="col-sm-6 col-sm-pull-5">
+        {% include 'hexmap.svg' %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6">
+    <h2>Zuletzt veröffentlichte Anfragen</h2>
+    <ol class="paper-list paper-list--with-body">
+      <!-- FIXME -->
+      <% @papers.each do |paper| %>
+      <li>
+        <p class="source-and-title">
+          <span class="source">
+            <%= link_to paper.body.state, paper.body, title: paper.body.name %>
+            <span class="label label-default"><%= link_to_paper paper.full_reference, paper %></span>
+          </span>
+          <%= link_to_paper paper.title, paper %>
+        </p>
+        <p class="meta">
+          Eingereicht von <%= paper.originators.collect(&:name).join(', ') %>
+          &mdash;
+          Veröffentlicht vor <%= relative_time_dativ(paper.published_at) %>
+        </p>
+      </li>
+      <% end %>
+    </ol>
+    <a class="btn btn-default recent-link" href="/recent">Mehr zuletzt veröffentlichte Anfragen&hellip;</a>
+  </div>
+</div>
+{% endblock %}
