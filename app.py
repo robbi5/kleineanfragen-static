@@ -6,9 +6,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 
 app = Flask(__name__, static_folder='assets')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 
 db = SQLAlchemy(app)
 
@@ -19,7 +18,8 @@ class Body(db.Model):
     state = db.Column(db.String(2))
     website = db.Column(db.Text)
     slug = db.Column(db.String(255))
-    #legislative_terms = db.relationship('LegislativeTerm', backref='Body', lazy=True)
+    use_mirror_for_download = db.Column(db.Boolean)
+    legislative_terms = db.relationship('LegislativeTerm')
 
 class LegislativeTerm(db.Model):
     __tablename__ = 'legislative_terms'
@@ -28,6 +28,7 @@ class LegislativeTerm(db.Model):
     term = db.Column(db.Integer)
     starts_at = db.Column(db.Date)
     ends_at = db.Column(db.Date)
+    body = db.relationship('Body')
 
 class Paper(db.Model):
     __tablename__ = 'papers'
@@ -46,6 +47,7 @@ class Paper(db.Model):
     frozen_at = db.Column(db.Boolean)
     source_url = db.Column(db.Text)
     contains_classified_information = db.Column(db.Boolean)
+    body = db.relationship('Body')
 
     DOCTYPE_MINOR_INTERPELLATION = 'minor'
     DOCTYPE_MAJOR_INTERPELLATION = 'major'
@@ -106,6 +108,14 @@ def info():
 def search():
     return abort(501)
 
+@app.route('/recent.atom')
+def recent_atom():
+    return 'FIXME'
+
+@app.route('/recent')
+def recent():
+    return 'FIXME'
+
 @app.route('/<body>/<int:legislative_term>/<slug>/viewer')
 def paper_viewer(body, legislative_term, slug):
     return 'FIXME'
@@ -136,19 +146,12 @@ def legislative_term(body, legislative_term):
 def body(body):
     return 'FIXME'
 
-@app.route('/recent.atom')
-def recent_atom():
-    return 'FIXME'
-
-@app.route('/recent')
-def recent():
-    return 'FIXME'
-
 @app.route('/')
 def index():
     bodies = Body.query.order_by(text("state != 'BT', name ASC")).all()
-    count= Paper.query.count()
-    return render_template('index.html', bodies=bodies, count=count)
+    count = int(round(Paper.query.count(), -1))
+    recent = Paper.query.filter(Paper.published_at.isnot(None)).order_by(Paper.published_at.desc(), Paper.reference.desc()).limit(11)
+    return render_template('index.html', bodies=bodies, count=count, recent=recent)
 
 if __name__ == '__main__':
     app.run()

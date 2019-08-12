@@ -53,14 +53,14 @@
     <h2>Zuletzt veröffentlichte Anfragen</h2>
     <ol class="paper-list paper-list--with-body">
       <!-- FIXME -->
-      <% @papers.each do |paper| %>
+      {% for paper in recent %}
       <li>
         <p class="source-and-title">
           <span class="source">
-            <%= link_to paper.body.state, paper.body, title: paper.body.name %>
-            <span class="label label-default"><a href="{{ url_for('paper', body='None', legislative_term=42, slug='None') }}">paper.full_reference</a></span>
+            <a href="{{ url_for('body', body=paper.body.slug) }}" title="{{ paper.body.name }}">{{ paper.body.state }}</a>
+            <span class="label label-default"><a href="{{ url_for('paper', body=paper.body.slug, legislative_term=paper.legislative_term, slug=paper.slug) }}">{{ paper.full_reference() }}</a></span>
           </span>
-          <a href="{{ url_for('paper', body='None', legislative_term=42, slug='None') }}">paper.title</a>
+          <a href="{{ url_for('paper', body=paper.body.slug, legislative_term=paper.legislative_term, slug=paper.slug) }}">{{ paper.title }}</a>
         </p>
         <p class="meta">
           Eingereicht von <%= paper.originators.collect(&:name).join(', ') %>
@@ -68,7 +68,7 @@
           Veröffentlicht vor <%= relative_time_dativ(paper.published_at) %>
         </p>
       </li>
-      <% end %>
+      {% endfor %}
     </ol>
     <a class="btn btn-default recent-link" href="{{ url_for('recent') }}">Mehr zuletzt veröffentlichte Anfragen&hellip;</a>
   </div>
