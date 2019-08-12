@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ body.name }}{% endblock %}
+{% block head %}
+  <link rel="alternate" type="application/atom+xml" title="ATOM" href="{{ url_for('body_atom', body=body.slug, _external=True) }}" />
+{% endblock %}
+
+{% block content %}
+<div class="page-header page-header--has-feed">
+  <h1>{{ body.name }} <small><code>({{ body.state }})</code></small></h1>
+  <a href="{{ url_for('body_atom', body=body.slug, _external=True) }}" class="feed" title="neue Anfragen als Atom-Feed abonnieren">
+    <span class="sr-only">neue Anfragen als Atom-Feed abonnieren:</span><img src="{{ url_for('static', filename='feed-icon.svg') }}" class="feed-icon" alt="Atom-Feed"/>
+  </a>
+</div>
+
+<div class="page-content row">
+  <div class="col-md-6">
+    <ol class="legislative-terms-overview">
+      {% for term in terms %}
+      <li class="row">
+        <h2 class="col-xs-9 col-sm-10"><a href="{{ url_for('legislative_term', body=body.slug, legislative_term=term.term) }}">{{ term.term }}. Wahlperiode</a></h2>
+        <div class="paper-count col-xs-3 col-sm-2">
+          <!-- FIXME -->
+          <span><%= number_with_delimiter term.papers.count %></span><br/>
+          <%= t :anfragen, count: term.papers.count %>
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  <div class="col-md-6">
+    <div class="latest-result">
+      <!-- FIXME -->
+      <%- unless @latest_paper.nil? -%>
+        Neueste Anfrage vor <%= relative_time_dativ @latest_paper.published_at %> veröffentlicht
+      <%- end -%>
+    </div>
+
+    <!-- FIXME -->
+    <% if @body.ministries.size > 0 %>
+    <h3>Behörden:</h3>
+    <ul>
+      <% @body.ministries.order(name: :asc).each do |ministry| %>
+      <li><%= link_to ministry.name, ministry_path(@body, ministry) %> <small>(<%= number_with_delimiter ministry.papers.count %>)</small></li>
+      <% end %>
+    </ul>
+    <% end %>
+
+    <!-- FIXME -->
+    <% if @body.organizations.size > 0 %>
+    <h3>Fraktionen:</h3>
+    <ul>
+      <% @body.organizations.order(name: :asc).each do |organization| %>
+      <li><%= link_to organization.name, organization_path(@body, organization) %> <small>(<%= number_with_delimiter organization.papers.where(body: @body).count %>)</small></li>
+      <% end %>
+    </ul>
+    <% end %>
+  </div>
+</div>
+
+{% endblock %}

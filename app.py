@@ -116,6 +116,10 @@ def recent_atom():
 def recent():
     return 'FIXME'
 
+@app.route('/<body>/<int:legislative_term>/<slug>/report')
+def paper_report(body, legislative_term, slug):
+    return abort(501)
+
 @app.route('/<body>/<int:legislative_term>/<slug>/viewer')
 def paper_viewer(body, legislative_term, slug):
     return 'FIXME'
@@ -140,11 +144,23 @@ def paper(body, legislative_term, slug):
 
 @app.route('/<body>/<int:legislative_term>')
 def legislative_term(body, legislative_term):
+    body = Body.query.filter_by(slug=body).first_or_404()
+    legislative_term = LegislativeTerm.query.filter_by(body_id=body.id, term=legislative_term).first_or_404()
+    return render_template('legislative_term/show.html', body=body, legislative_term=legislative_term)
+
+@app.route('/<body>/abo')
+def body_abo(body):
+    return abort(501)
+
+@app.route('/<body>.atom')
+def body_atom(body):
     return 'FIXME'
 
 @app.route('/<body>')
 def body(body):
-    return 'FIXME'
+    body = Body.query.filter_by(slug=body).first_or_404()
+    terms = LegislativeTerm.query.filter_by(body_id=body.id).order_by(LegislativeTerm.term.desc())
+    return render_template('body/show.html', body=body, terms=terms)
 
 @app.route('/')
 def index():

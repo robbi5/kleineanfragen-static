@@ -8,7 +8,6 @@
 <div class="jumbotron jumbotron--home">
   <div class="container">
     <form action="/search" method="get" role="search" class="search">
-      <!-- FIXME -->
       <p><label for="searchq" class="tagline">Suche in über {{ '{:,}'.format(count).replace(',', '.') }} Anfragen:</label></p>
       <div class="input-group">
         <input type="text" id="searchq" name="q" class="form-control" placeholder="Suche nach Themen wie &quot;Schulen&quot;, &quot;Mobilität&quot;, &hellip;" />
@@ -62,6 +61,7 @@
           </span>
           <a href="{{ url_for('paper', body=paper.body.slug, legislative_term=paper.legislative_term, slug=paper.slug) }}">{{ paper.title }}</a>
         </p>
+        <!-- FIXME -->
         <p class="meta">
           Eingereicht von <%= paper.originators.collect(&:name).join(', ') %>
           &mdash;
