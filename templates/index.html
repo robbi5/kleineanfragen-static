@@ -2,15 +2,14 @@
 
 {% block head %}
   <meta name="description" content="kleineAnfragen sammelt kleine und große Anfragen von den Landesparlamenten und macht diese durchsuch- und verlinkbar" />
-  <!-- FIXME -->
-  <% auto_discovery_link_tag(:atom, recent_url(format: :atom)) %>
+  <link rel="alternate" type="application/atom+xml" title="ATOM" href="{{ url_for('recent_atom', _external=True) }}" />
 {% endblock %}
 {% block main_fullwidth_prepend %}
 <div class="jumbotron jumbotron--home">
   <div class="container">
     <form action="/search" method="get" role="search" class="search">
       <!-- FIXME -->
-      <p><label for="searchq" class="tagline">Suche in über <%= number_with_delimiter @count %> Anfragen:</label></p>
+      <p><label for="searchq" class="tagline">Suche in über {{ '{:,}'.format(count).replace(',', '.') }} Anfragen:</label></p>
       <div class="input-group">
         <input type="text" id="searchq" name="q" class="form-control" placeholder="Suche nach Themen wie &quot;Schulen&quot;, &quot;Mobilität&quot;, &hellip;" />
         <span class="input-group-btn">
@@ -39,10 +38,9 @@
     <div class="row bodies">
       <div class="col-sm-5 col-sm-push-6">
         <ul class="bodies-list">
-          <!-- FIXME -->
-          <% @bodies.each do |body| %>
-          <li><a href="<%= body_path body %>" class="link-state-<%= body.state %>" data-state="<%= body.state %>"><%= body.name %></a></li>
-          <% end %>
+          {% for body in bodies %}
+          <li><a href="{{ url_for('body', body=body.slug) }}" class="link-state-{{ body.state }}" data-state="{{ body.state }}">{{ body.name }}</a></li>
+          {% endfor %}
         </ul>
       </div>
       <div class="col-sm-6 col-sm-pull-5">
@@ -60,9 +58,9 @@
         <p class="source-and-title">
           <span class="source">
             <%= link_to paper.body.state, paper.body, title: paper.body.name %>
-            <span class="label label-default"><%= link_to_paper paper.full_reference, paper %></span>
+            <span class="label label-default"><a href="{{ url_for('paper', body='None', legislative_term=42, slug='None') }}">paper.full_reference</a></span>
           </span>
-          <%= link_to_paper paper.title, paper %>
+          <a href="{{ url_for('paper', body='None', legislative_term=42, slug='None') }}">paper.title</a>
         </p>
         <p class="meta">
           Eingereicht von <%= paper.originators.collect(&:name).join(', ') %>
@@ -72,7 +70,7 @@
       </li>
       <% end %>
     </ol>
-    <a class="btn btn-default recent-link" href="/recent">Mehr zuletzt veröffentlichte Anfragen&hellip;</a>
+    <a class="btn btn-default recent-link" href="{{ url_for('recent') }}">Mehr zuletzt veröffentlichte Anfragen&hellip;</a>
   </div>
 </div>
 {% endblock %}

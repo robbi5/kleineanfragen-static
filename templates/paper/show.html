@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ paper.title }} ({{ paper.full_reference() }}) &mdash; {{ body.name }}, {{ paper.legislative_term }}. Wahlperiode{% endblock %}
+
+{% block head %}
+  <!--FIXME-->
+  <meta name="description" content="<%= @paper.description %>" />
+  <meta property="og:title" content="{{ paper.title }}" />
+  <meta property="og:description" content="<%= @paper.description %>" />
+  <meta property="og:image" content="<%= @paper.thumbnail_url %>" />
+  <meta name="twitter:title" value="{{ paper.title }}" />
+  <meta name="twitter:description" value="<%= @paper.description %>" />
+  <meta name="twitter:image" value="<%= @paper.thumbnail_url %>" />
+
+  <link rel="alternate" type="application/json" href="{{ url_for('paper_json', body=body.slug, legislative_term=paper.legislative_term, slug=paper.slug) }}" />
+  <link rel="alternate" type="text/plain" href="{{ url_for('paper_txt', body=body.slug, legislative_term=paper.legislative_term, slug=paper.slug) }}" />
+{% endblock %}
+
+{% block main_class %}page-paper{% endblock %}
+
+{% block main_fullwidth_prepend %}
+<div class="page-header page-paper-header">
+  <div class="container">
+    <ol class="breadcrumb">
+      <li><a href="{{ url_for('body', body=body.slug) }}">{{ body.name }}</a></li>
+      <li><a href="{{ url_for('legislative_term', body=body.slug, legislative_term=paper.legislative_term) }}">{{ paper.legislative_term }}. Wahlperiode</a></li>
+      <li class="active">Drucksache {{ paper.reference }}</li>
+    </ol>
+
+    <h1><span class="label label-default label-big paper-reference hidden-xs">{{ paper.full_reference() }}</span> {{ paper.title }}</h1>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-3 col-md-push-9">
+    <p>{{ paper.doctype_human() | title }}</p>
+    <p>
+      Eingereicht von:<br class="hidden-xs hidden-sm"/>
+      <%-
+        o_people = @paper.originator_people.collect(&:name)
+        o_orgs = @paper.originator_organizations
+      -%>
+      <%= o_people.join(', ') %><% if o_people.size > 0 %><span class="visible-xs-inline visible-sm-inline">,</span><br class="hidden-xs hidden-sm" /><% end %>
+      <%= safe_join(o_orgs.map { |org| link_to org.name, organization_path(@body, org) }, ', ') %>
+    </p>
+    <% if @paper.answerer_ministries.size > 0 %>
+    <p>
+      Beantwortet von:<br class="hidden-xs hidden-sm"/>
+      <%= safe_join(@paper.answerer_ministries.map {|ministry| link_to ministry.name, ministry_path(@body, ministry) }, ', ') %>
+    </p>
+    <% end %>
+    {% if paper.published_at %}
+    <p>Veröffentlicht am {{ paper.published_at.strftime('%d.%m.%Y') }}</p>
+    {% endif %}
+    <p>
+      <a href="{{ url_for('paper_pdf', body=body.slug, legislative_term=paper.legislative_term, slug=paper.slug) }}" class="btn btn-primary" target="_blank">PDF herunterladen</a>
+      <br/>
+      <small>
+        {{ paper.page_count or '?' }} <%= t :pages, count: @paper.page_count || 0 %>
+        <% if @body.use_mirror_for_download? %>
+          &mdash; Gespiegelte Version <a href="{{ url_for('info') }}">(?)</a>
+        <% end %>
+        {% if paper.contents %}
+          &mdash; <a href="{{ url_for('paper_txt', body=body.slug, legislative_term=paper.legislative_term, slug=paper.slug) }}" target="_blank">als Text</a>
+        {% endif %}
+        {% if paper.source_url %}
+          &mdash; <a href="{{ paper.source_url }}">Quelle</a>
+        {% endif %}
+      </small>
+    </p>
+    <p>
+      <label for="shorturl" class="shorturl-label">Kurz-URL:</label>
+      <input type="text" name="shorturl" id="shorturl" value="{{ url_for('paper', body=body.slug, legislative_term=paper.legislative_term, slug=paper.reference, _external=True) }}" readonly="readonly" class="shorturl-input"/>
+    </p>
+    {% if paper.contains_table %}
+    <div class="paper-contains-table">
+      <h4>Daten extrahieren</h4>
+      <p>Diese Anfrage enthält eine oder mehrere Tabellen. Um diese einfach exportieren zu können, ist u.a. <a href="http://tabula.technology">Tabula</a> hilfreich.</p>
+    </div>
+    {% endif %}
+  </div>
+  <div class="col-md-9 col-md-pull-3 paper-viewer-wrapper">
+    <% if o_orgs.collect(&:name).map(&:downcase).include? 'npd' %>
+    <div class="alert alert-nuts">
+      <p><strong>Hinweis:</strong> Diese Anfrage kann Spuren von Rechtsextremismus enthalten.</p>
+    </div>
+    <% end %>
+    <iframe src="{{ url_for('paper_viewer', body=body.slug, legislative_term=paper.legislative_term, slug=paper.slug) }}" width="100%" height="600px" frameborder="0" allowfullscreen="allowfullscreen" id="paper-viewer-iframe"></iframe>
+  </div>
+</div>
+
+<% if paper.part_of_series? %>
+<div class="row">
+  <div class="col-md-9">
+    <p>
+      Diese Anfrage scheint Teil einer Serie zu sein.
+      <%= link_to 'Nach weiteren Anfragen in dieser Serie suchen.', search_path({
+          q: "\"#{@paper.series_title}\" body:#{@body.state}",
+          sort: 'published_at:desc'
+        })%>
+    </p>
+  </div>
+</div>
+<% end %>
+
+<%
+  if @paper.related_papers.size > 0
+    related = @paper.related_papers.uniq
+%>
+<div class="row">
+  <div class="col-md-9">
+    <h3><%= t :related_papers, count: related.size %>:</h3>
+    <ul class="paper-list paper-list--with-body">
+      <%= render partial: 'paper/paper', collection: related, locals: { show_body: true }  %>
+    </ul>
+  </div>
+</div>
+<% end %>
+
+<!-- Paper/<%= @paper.id %> -->
+{% endblock %}
